@@ -33,7 +33,7 @@ Repository ini berisi **materi TUWEB (Tutorial Web)** lengkap untuk mata kuliah 
 ## 📚 Materi TUWEB
 
 ### 🟢 **TUWEB 1: Fundamental TypeScript & Vue.js**
-**File:** [`TUWEB_1_Fundamental_TypeScript_Vue_IMPROVED.md`](https://www.typescriptlang.org/)
+**File:** [`TUWEB_1_Fundamental_TypeScript_Vue_IMPROVED.md`](https://github.com/yeviki/perangkat_bergerak/blob/main/TUWEB_1_Fundamental_TypeScript_Vue_IMPROVED.md)
 
 | Detail | Informasi |
 |--------|-----------|
@@ -51,7 +51,7 @@ Repository ini berisi **materi TUWEB (Tutorial Web)** lengkap untuk mata kuliah 
 ---
 
 ### 🔵 **TUWEB 2: Ionic Framework & API Integration**
-**File:** `TUWEB_2_Ionic_API_Integration_IMPROVED.md`
+**File:** [`TUWEB_2_Ionic_API_Integration_IMPROVED.md`](https://github.com/yeviki/perangkat_bergerak/blob/main/TUWEB_2_Ionic_API_Integration_IMPROVED.md)
 
 | Detail | Informasi |
 |--------|-----------|
@@ -69,7 +69,7 @@ Repository ini berisi **materi TUWEB (Tutorial Web)** lengkap untuk mata kuliah 
 ---
 
 ### 🟣 **TUWEB 3: Advanced Features & Deployment**
-**File:** `TUWEB_3_Projek_Lengkap_Deployment_IMPROVED.md`
+**File:** [`TUWEB_3_Projek_Lengkap_Deployment_IMPROVED.md`](https://github.com/yeviki/perangkat_bergerak/blob/main/TUWEB_3_Projek_Lengkap_Deployment_IMPROVED.md)
 
 | Detail | Informasi |
 |--------|-----------|
