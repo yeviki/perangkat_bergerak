@@ -1,6 +1,6 @@
 # TUWEB 2: Integrasi Ionic Framework dengan API Eksternal
 
-**Mata Kuliah:** Pemrograman Berbasis Piranti Bergerak (MSIM4401)  
+**Mata Kuliah:** Pemrograman Berbasis Perangkat Bergerak (MSIM4401)  
 **Dosen:** Yeviki Maisyah Putra, S.Kom, M.Kom.  
 **Universitas:** Universitas Putra Indonesia YPTK Padang - Universitas Terbuka  
 **Durasi:** 120 menit (2 jam)
