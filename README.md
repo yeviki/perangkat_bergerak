@@ -264,7 +264,7 @@ Universitas Terbuka - Faculty of Computer Science
 ## 📞 Support & Contact
 
 ### 💬 **Get Help**
-- 📧 **Email:** yeviki.maisyahputra@gmail.com.ac.id  
+- 📧 **Email:** yeviki.maisyahputra@gmail.com / yeviki.maisyahputra@upiyptk.ac.id 
 - 💬 **WhatsApp:** 082285444048
 - 🕐 **Office Hours:** 08.00 s/d 16.00
 
