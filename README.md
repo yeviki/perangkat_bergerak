@@ -1,8 +1,8 @@
-# perangkat_bergerak
-Assalamualaikum, wr, wb, berikut adalah bahan materi dan langkah-langkah belajar mandiri untuk Mata Kuliah - Pemrograman Berbasis Perangkat Bergerak
+# Pemrograman Berbasis Perangkat Bergerak
+Assalamualaikum, wr, wb, Semoga Kita Sehat Selalu, berikut adalah bahan materi dan langkah-langkah belajar mandiri untuk pemrograman piranti bergerak, diharapkan materi ini dapat mempermudah dan memahami semua pembahasan yang ada, selamat mengerjakan... ^_^
 
 # 📱 TUWEB Mobile Development
-## Pemrograman Berbasis Piranti Bergerak - Universitas Terbuka
+## Pemrograman Berbasis Piranti Bergerak
 
 <div align="center">
 
@@ -20,10 +20,10 @@ Repository ini berisi **materi TUWEB (Tutorial Web)** lengkap untuk mata kuliah 
 
 ### 📊 Project Information
 - **👨‍🏫 Dosen Pengampu:** Yeviki Maisyah Putra, S.Kom, M.Kom
-- **🏛️ Universitas:** 
-    1. Dinas Komunikasi, Informatika dan Statistik Provinsi Sumatera Barat
-    2. Universitas Putra Indonesia YTPK Padang
-    3. Universitas Terbuka
+- **💼 Office :** Dinas Komunikasi, Informatika dan Statistik Provinsi Sumatera Barat
+- **🏛️ Universitas :** 
+    1. Universitas Putra Indonesia YTPK Padang, Sistem Informasi, Fakultas Ilmu Komputer
+    2. Universitas Terbuka
 - **🎯 Target Audience:** Mahasiswa tingkat pemula
 - **⏰ Total Durasi:** 360 menit (6 jam)
 - **📈 Difficulty Level:** Progressive (Basic → Advanced)
@@ -214,11 +214,14 @@ graph LR
 
 ## 👨‍🏫 Informasi Pengajar
 
-**👨‍🏫 Nama:** Yeviki Maisyah Putra, S.Kom, M.Kom  
-**🏛️ Universitas:** Universitas Putra Indonesia YPTK Padang 2017 - Sekarang  
-**📧 Email:** yeviki.maisyahputra@gmail.com.ac.id  
-**🎓 Bidang Keahlian:** Web Development, System Analyst  
-**📱 Research:** Hybrid Mobile Applications, Web Application, IoT Integration
+**👨‍🏫 Nama :** Yeviki Maisyah Putra, S.Kom, M.Kom  
+**💼 Office :** Dinas Komunikasi, Informatika dan Statistik Provinsi Sumatera Barat
+**🏛️ Universitas :** 
+    1. Universitas Putra Indonesia YTPK Padang, Sistem Informasi, Fakultas Ilmu Komputer
+    2. Universitas Terbuka  
+**📧 Email :** yeviki.maisyahputra@gmail.com.ac.id  
+**🎓 Bidang Keahlian :** Web Development, System Analyst  
+**📱 Research :** Hybrid Mobile Applications, Web Application, IoT Integration
 
 ---
 
