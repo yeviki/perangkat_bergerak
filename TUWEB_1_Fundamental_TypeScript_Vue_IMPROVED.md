@@ -159,7 +159,7 @@ let kosong: null = null;
 
 ```typescript
 // Array of strings
-let mahasiswa: string[] = ["Budi", "Ani", "Citra", "Doni"];
+let mahasiswa: string[] = ["Badu", "Ani", "Citra", "Doni"];
 let mataKuliah: Array<string> = ["Pemrograman", "Basis Data", "Jaringan"];
 
 // Array of numbers
@@ -176,12 +176,12 @@ interface Mahasiswa {
 let dataMahasiswa: Mahasiswa[] = [
   { nim: "230411013", nama: "Ahmad Rizki", ipk: 3.75 },
   { nim: "230411014", nama: "Siti Nurhaliza", ipk: 3.85 },
-  { nim: "230411015", nama: "Budi Santoso", ipk: 3.65 }
+  { nim: "230411015", nama: "Badu Santoso", ipk: 3.65 }
 ];
 
 // Array operations
 console.log(mahasiswa.length); // 4
-console.log(mahasiswa[0]); // "Budi"
+console.log(mahasiswa[0]); // "Badu"
 mahasiswa.push("Eko"); // tambah data
 mahasiswa.pop(); // hapus data terakhir
 ```
@@ -212,7 +212,7 @@ let mhs1: Mahasiswa = {
   isActive: true,
   alamat: {
     jalan: "Jl. Ahmad Yani No. 123",
-    kota: "Samarinda",
+    kota: "Padang",
     provinsi: "Kalimantan Timur"
   }
 };
@@ -226,7 +226,7 @@ let mhs2: Mahasiswa = {
 
 // Mengakses object properties
 console.log(mhs1.nama); // "Ahmad Rizki"
-console.log(mhs1.alamat?.kota); // "Samarinda" (safe navigation)
+console.log(mhs1.alamat?.kota); // "Padang" (safe navigation)
 ```
 
 ### 1.4 Function dengan TypeScript (Step by Step)
@@ -240,8 +240,8 @@ function sapa(nama: string): string {
 }
 
 // Memanggil function
-let pesan = sapa("Anton");
-console.log(pesan); // "Halo, Anton! Selamat belajar TypeScript"
+let pesan = sapa("Yeviki");
+console.log(pesan); // "Halo, Yeviki! Selamat belajar TypeScript"
 ```
 
 #### 🧮 **2. Function dengan Multiple Parameters**
@@ -304,14 +304,14 @@ simpanDataMahasiswa("230411013", "Ahmad Rizki");
 function biodata(
   nama: string, 
   umur: number = 20, 
-  kota: string = "Samarinda"
+  kota: string = "Padang"
 ): string {
   return `Nama: ${nama}, Umur: ${umur}, Kota: ${kota}`;
 }
 
 // Memanggil dengan berbagai cara
-console.log(biodata("Anton")); // "Nama: Anton, Umur: 20, Kota: Samarinda"
-console.log(biodata("Budi", 25)); // "Nama: Budi, Umur: 25, Kota: Samarinda"
+console.log(biodata("Yeviki")); // "Nama: Yeviki, Umur: 20, Kota: Padang"
+console.log(biodata("Badu", 25)); // "Nama: Badu, Umur: 25, Kota: Padang"
 console.log(biodata("Citra", 22, "Balikpapan")); // "Nama: Citra, Umur: 22, Kota: Balikpapan"
 ```
 
