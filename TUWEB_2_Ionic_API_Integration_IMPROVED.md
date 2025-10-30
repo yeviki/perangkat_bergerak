@@ -2026,4 +2026,4 @@ Selamat! Anda telah menyelesaikan TUWEB 2 dan telah berhasil:
 *Dicetak oleh: Yeviki Maisyah Putra, S.Kom, M.Kom.*  
 *Universitas Putra Indonesia YPTK Padang - Program Studi Sistem Informasi*  
 *Universitas Terbuka - Pusat Belajar Jarak Jauh*  
-*Tanggal: 1 Oktober 2025*
+*Tanggal: 30 Oktober 2025*
