@@ -9,6 +9,7 @@
 
 ## 🎯 Tujuan Pembelajaran
 
+Assalamualaikum, wr, wb, Semoga Kita Sehat Selalu, berikut adalah materi mandiri tentang Integrasi Ionic Framework dengan API Eksternal, selamat mengerjakan... ^_^
 Setelah mengikuti sesi ini, mahasiswa diharapkan mampu:
 
 ### 📋 Level Pemahaman (Bloom's Taxonomy)
