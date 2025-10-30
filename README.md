@@ -33,7 +33,7 @@ Repository ini berisi **materi TUWEB (Tutorial Web)** lengkap untuk mata kuliah 
 ## 📚 Materi TUWEB
 
 ### 🟢 **TUWEB 1: Fundamental TypeScript & Vue.js**
-**File:** `TUWEB_1_Fundamental_TypeScript_Vue_IMPROVED.md`
+**File:** [`TUWEB_1_Fundamental_TypeScript_Vue_IMPROVED.md`](https://www.typescriptlang.org/)
 
 | Detail | Informasi |
 |--------|-----------|
