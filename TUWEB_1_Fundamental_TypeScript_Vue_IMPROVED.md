@@ -9,6 +9,7 @@
 
 ## 🎯 Tujuan Pembelajaran
 
+Assalamualaikum, wr, wb, Semoga Kita Sehat Selalu, berikut adalah materi fundamental dari TypeScript & Vue.js, selamat mengerjakan... ^_^ 
 Setelah mengikuti sesi ini, mahasiswa diharapkan mampu:
 
 ### 📋 Level Pemahaman (Bloom's Taxonomy)
