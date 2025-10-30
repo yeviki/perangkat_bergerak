@@ -1,6 +1,6 @@
 # TUWEB 3: Proyek Lengkap & Deployment Aplikasi Mobile
 
-**Mata Kuliah:** Pemrograman Berbasis Piranti Bergerak (MSIM4401)  
+**Mata Kuliah:** Pemrograman Berbasis Perangkat Bergerak (MSIM4401)  
 **Dosen :** Yeviki Maisyah Putra, S.Kom, M.Kom.  
 **Universitas :** Universitas Putra Indonesia YPTK Padang - Universitas Terbuka  
 **Durasi :** 120 menit (2 jam)
@@ -1547,4 +1547,4 @@ Selamat atas pencapaian luar biasa Anda! Anda tidak hanya belajar tentang coding
 *Dicetak oleh: Yeviki Maisyah Putra, S.Kom, M.Kom.*  
 *Universitas Putra Indonesia YPTK Padang - Program Studi Sistem Informasi*  
 *Universitas Terbuka - Pusat Belajar Jarak Jauh*  
-*Tanggal: 1 Oktober 2025*
+*Tanggal: 30 Oktober 2025*
