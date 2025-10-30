@@ -1526,12 +1526,6 @@ Anda telah menyelesaikan seluruh materi Pemrograman Berbasis Piranti Bergerak:
 
 Anda telah mengambil langkah pertama yang penting dalam dunia mobile development. Teruslah belajar, teruslah berkarya, dan jangan pernah berhenti untuk berinovasi.
 
-**Remember:**
-- 🌱 **Every expert was once a beginner**
-- 🚀 **Consistency beats intensity**
-- 💡 **Curiosity drives innovation**
-- 🤝 **Community accelerates growth**
-
 ### 📞 **Support & Contact**
 
 **For Future Support:**
