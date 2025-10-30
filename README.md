@@ -20,7 +20,10 @@ Repository ini berisi **materi TUWEB (Tutorial Web)** lengkap untuk mata kuliah 
 
 ### 📊 Project Information
 - **👨‍🏫 Dosen Pengampu:** Yeviki Maisyah Putra, S.Kom, M.Kom
-- **🏛️ Universitas:** 1. Universitas Putra Indonesia YTPK Padang - 2. Universitas Terbuka
+- **🏛️ Universitas:** 
+    1. Dinas Komunikasi, Informatika dan Statistik Provinsi Sumatera Barat
+    2. Universitas Putra Indonesia YTPK Padang
+    3. Universitas Terbuka
 - **🎯 Target Audience:** Mahasiswa tingkat pemula
 - **⏰ Total Durasi:** 360 menit (6 jam)
 - **📈 Difficulty Level:** Progressive (Basic → Advanced)
