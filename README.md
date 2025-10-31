@@ -116,8 +116,8 @@ ionic --version
 ### 🔧 Setup Environment
 ```bash
 # Clone repository
-git clone https://github.com/yeviki/tuweb-mobile.git
-cd tuweb-mobile
+git clone https://github.com/yeviki/perangkat_bergerak.git
+cd perangkat_bergerak
 
 # Choose your TUWEB session
 # TUWEB 1: Fundamental
@@ -292,8 +292,8 @@ Universitas Terbuka - Faculty of Computer Science
 **Quote : Lebih Baik Gagal Dalam Mencoba Dari Pada Tidak Sama Sekali**
 **Build Amazing Mobile Applications with TypeScript, Vue.js & Ionic**
 
-[![GitHub stars](https://img.shields.io/github/stars/yeviki/tuweb-mobile.svg?style=social&label=Star)](https://github.com/yeviki/perangkat_bergerak)
-[![GitHub forks](https://img.shields.io/github/forks/yeviki/tuweb-mobile.svg?style=social&label=Fork)](https://github.com/yeviki/perangkat_bergerak)
+[![GitHub stars](https://img.shields.io/github/stars/yeviki/perangkat_bergerak.svg?style=social&label=Star)](https://github.com/yeviki/perangkat_bergerak)
+[![GitHub forks](https://img.shields.io/github/forks/yeviki/perangkat_bergerak.svg?style=social&label=Fork)](https://github.com/yeviki/perangkat_bergerak)
 
 </div>
 
