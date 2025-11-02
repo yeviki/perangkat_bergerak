@@ -124,6 +124,31 @@ Buka file `tsconfig.json` dan ubah beberapa setting:
   }
 }
 ```
+Atau seperti dibawah ini :
+```json
+{
+  "compilerOptions": {
+    "target": "es2019",
+    "module": "commonjs",
+    "strict": true,
+    "types": ["node"]
+  }
+}
+```
+Gunakan ini jika menggunakan fitur readline atau inputan pada CLI :
+diletakkan pada bagian atas sekali code program
+```typescript
+import * as readline from 'readline';
+```
+Dan Instal dibawah ini untuk menambah library dari readline nya :
+```typescript
+npm install -D typescript ts-node @types/node
+```
+#### 🛠️ **Step 5: Menjalankan Terminal atau Run Page Project TypeScript Yang Sudah Dibuat**
+Buka file `tsconfig.json` dan ubah beberapa setting:
+```json
+npx ts-node [namaPage].ts
+```
 
 ### 1.3 Tipe Data Dasar TypeScript (Detail Lengkap)
 
