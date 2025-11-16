@@ -179,6 +179,11 @@ cd ionic-weather-app
 
 # Create new project dengan Vue.js
 ionic start . tabs --type=vue
+# atau
+ionic start . tabs
+
+# Atau jika file folder belum di create seperti ini
+ionic start ionic-weather-app2 tabs
 
 # Pilihan yang akan muncul:
 # ? Framework: Vue
