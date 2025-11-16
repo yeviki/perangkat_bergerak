@@ -463,7 +463,7 @@ Membuat project Ionic Vue.js untuk aplikasi cuaca dengan integrasi API.
 
 ```bash
 # Create new project
-ionic start weather-app tabs --type=vue
+ionic start weather-app tabs --type vue
 
 # Navigate to project
 cd weather-app
@@ -481,1339 +481,353 @@ npm install ionicons
 weather-app/
 ├── src/
 │   ├── components/          # Reusable components
-│   │   ├── WeatherCard.vue
-│   │   ├── LoadingSpinner.vue
+│   │   ├── DailyForecast.vue
+│   │   ├── HourlyForecast.vue
 │   │   └── ErrorMessage.vue
-│   ├── services/           # API services
-│   │   └── weatherService.ts
-│   ├── types/              # TypeScript interfaces
-│   │   └── weather.ts
+│   │   └── LoadingSpinner.vue
+│   │   └── WeatherCard.vue
+│   │   └── WeatherChart.vue (Optional)
 │   ├── views/              # Page components
 │   │   ├── Tab1Page.vue    # → WeatherPage.vue
-│   │   ├── Tab2Page.vue    # → ForecastPage.vue
-│   │   └── Tab3Page.vue    # → SettingsPage.vue
-│   └── composables/        # Vue composables
-│       └── useWeather.ts
+│   │   ├── Tab2Page.vue    
+│   │   └── Tab3Page.vue    
+
 ```
 
-### 📝 **Step 3: Create TypeScript Interfaces**
+### 📝 **Step 3: Create DailyForecast.vue**
 
 ```typescript
-// src/types/weather.ts
+// src/components/DailyForecast.vue
 
-export interface WeatherLocation {
-  name: string;
-  country: string;
-  latitude: number;
-  longitude: number;
-}
-
-export interface CurrentWeather {
-  temperature: number;
-  humidity: number;
-  windSpeed: number;
-  pressure: number;
-  visibility: number;
-  uvIndex: number;
-  description: string;
-  icon: string;
-}
-
-export interface HourlyForecast {
-  time: string;
-  temperature: number;
-  humidity: number;
-  precipitation: number;
-  windSpeed: number;
-  condition: string;
-}
-
-export interface DailyForecast {
-  date: string;
-  maxTemp: number;
-  minTemp: number;
-  condition: string;
-  precipitationChance: number;
-  sunrise: string;
-  sunset: string;
-}
-
-export interface WeatherData {
-  location: WeatherLocation;
-  current: CurrentWeather;
-  hourly: HourlyForecast[];
-  daily: DailyForecast[];
-  lastUpdated: string;
-}
-
-export interface WeatherError {
-  code: number;
-  message: string;
-  details?: string;
-}
-```
-
-### 🔧 **Step 4: Create Weather Service**
-
-```typescript
-// src/services/weatherService.ts
-
-import axios, { AxiosInstance, AxiosResponse } from 'axios';
-import { WeatherData, WeatherLocation, CurrentWeather, HourlyForecast, DailyForecast, WeatherError } from '@/types/weather';
-
-class WeatherService {
-  private api: AxiosInstance;
-  private readonly BASE_URL = 'https://api.open-meteo.com/v1/forecast';
-
-  constructor() {
-    this.api = axios.create({
-      baseURL: this.BASE_URL,
-      timeout: 10000,
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
-
-    // Request interceptor
-    this.api.interceptors.request.use(
-      (config) => {
-        console.log('🚀 API Request:', config.url);
-        return config;
-      },
-      (error) => {
-        console.error('❌ Request Error:', error);
-        return Promise.reject(error);
-      }
-    );
-
-    // Response interceptor
-    this.api.interceptors.response.use(
-      (response) => {
-        console.log('✅ API Response:', response.status);
-        return response;
-      },
-      (error) => {
-        console.error('❌ Response Error:', error.response?.status);
-        return Promise.reject(this.handleError(error));
-      }
-    );
-  }
-
-  // Get weather data by coordinates
-  async getWeatherByCoordinates(
-    latitude: number,
-    longitude: number
-  ): Promise<WeatherData> {
-    try {
-      const response: AxiosResponse = await this.api.get('', {
-        params: {
-          latitude,
-          longitude,
-          current_weather: true,
-          hourly: [
-            'temperature_2m',
-            'relativehumidity_2m',
-            'precipitation_probability',
-            'windspeed_10m',
-            'weathercode'
-          ],
-          daily: [
-            'temperature_2m_max',
-            'temperature_2m_min',
-            'precipitation_probability_max',
-            'sunrise',
-            'sunset',
-            'weathercode'
-          ],
-          timezone: 'auto',
-          forecast_days: 7
-        },
-      });
-
-      return this.transformWeatherData(response.data, latitude, longitude);
-    } catch (error) {
-      throw error;
-    }
-  }
-
-  // Get weather data by city name
-  async getWeatherByCity(cityName: string): Promise<WeatherData> {
-    try {
-      // First, get coordinates for the city
-      const coordinates = await this.getCityCoordinates(cityName);
-      
-      // Then get weather data using coordinates
-      return this.getWeatherByCoordinates(coordinates.lat, coordinates.lon);
-    } catch (error) {
-      throw new Error(`City "${cityName}" not found`);
-    }
-  }
-
-  // Get city coordinates (using Nominatim API)
-  private async getCityCoordinates(cityName: string): Promise<{ lat: number; lon: number }> {
-    try {
-      const response = await axios.get(`https://nominatim.openstreetmap.org/search`, {
-        params: {
-          q: cityName,
-          format: 'json',
-          limit: 1
-        }
-      });
-
-      if (response.data.length === 0) {
-        throw new Error('City not found');
-      }
-
-      const city = response.data[0];
-      return {
-        lat: parseFloat(city.lat),
-        lon: parseFloat(city.lon)
-      };
-    } catch (error) {
-      throw new Error('Failed to get city coordinates');
-    }
-  }
-
-  // Transform API response to our WeatherData interface
-  private transformWeatherData(apiData: any, latitude: number, longitude: number): WeatherData {
-    const current = apiData.current_weather;
-    const hourly = apiData.hourly;
-    const daily = apiData.daily;
-
-    // Get current hour index
-    const currentHourIndex = hourly.time.findIndex((time: string) => {
-      const hour = new Date(time).getHours();
-      const currentHour = new Date().getHours();
-      return hour === currentHour;
-    });
-
-    return {
-      location: {
-        name: this.getLocationName(latitude, longitude),
-        country: 'Indonesia', // Default, could be enhanced
-        latitude,
-        longitude
-      },
-      current: {
-        temperature: Math.round(current.temperature),
-        humidity: hourly.relativehumidity_2m[currentHourIndex] || 0,
-        windSpeed: Math.round(current.windspeed),
-        pressure: 1013, // Default, not provided by Open-Meteo free tier
-        visibility: 10, // Default, not provided by Open-Meteo free tier
-        uvIndex: 5, // Default, not provided by Open-Meteo free tier
-        description: this.getWeatherDescription(current.weathercode),
-        icon: this.getWeatherIcon(current.weathercode)
-      },
-      hourly: hourly.time.slice(0, 24).map((time: string, index: number) => ({
-        time: this.formatTime(time),
-        temperature: Math.round(hourly.temperature_2m[index]),
-        humidity: hourly.relativehumidity_2m[index],
-        precipitation: hourly.precipitation_probability[index],
-        windSpeed: Math.round(hourly.windspeed_10m[index]),
-        condition: this.getWeatherDescription(hourly.weathercode[index])
-      })),
-      daily: daily.time.map((date: string, index: number) => ({
-        date: this.formatDate(date),
-        maxTemp: Math.round(daily.temperature_2m_max[index]),
-        minTemp: Math.round(daily.temperature_2m_min[index]),
-        condition: this.getWeatherDescription(daily.weathercode[index]),
-        precipitationChance: daily.precipitation_probability_max[index],
-        sunrise: this.formatTime(daily.sunrise[index]),
-        sunset: this.formatTime(daily.sunset[index])
-      })),
-      lastUpdated: new Date().toISOString()
-    };
-  }
-
-  // Helper methods
-  private getLocationName(lat: number, lon: number): string {
-    // Simple location name based on coordinates
-    // In production, you'd use reverse geocoding API
-    if (Math.abs(lat - (-6.2088)) < 0.1 && Math.abs(lon - 106.8456) < 0.1) {
-      return "Jakarta";
-    } else if (Math.abs(lat - (-7.2575)) < 0.1 && Math.abs(lon - 112.7521) < 0.1) {
-      return "Surabaya";
-    } else if (Math.abs(lat - (-6.9175)) < 0.1 && Math.abs(lon - 107.6191) < 0.1) {
-      return "Bandung";
-    }
-    return `Lat: ${lat.toFixed(2)}, Lon: ${lon.toFixed(2)}`;
-  }
-
-  private getWeatherDescription(weatherCode: number): string {
-    const codes: { [key: number]: string } = {
-      0: 'Clear sky',
-      1: 'Mainly clear',
-      2: 'Partly cloudy',
-      3: 'Overcast',
-      45: 'Fog',
-      48: 'Depositing rime fog',
-      51: 'Light drizzle',
-      53: 'Moderate drizzle',
-      55: 'Dense drizzle',
-      56: 'Light freezing drizzle',
-      57: 'Dense freezing drizzle',
-      61: 'Slight rain',
-      63: 'Moderate rain',
-      65: 'Heavy rain',
-      66: 'Light freezing rain',
-      67: 'Heavy freezing rain',
-      71: 'Slight snow fall',
-      73: 'Moderate snow fall',
-      75: 'Heavy snow fall',
-      77: 'Snow grains',
-      80: 'Slight rain showers',
-      81: 'Moderate rain showers',
-      82: 'Violent rain showers',
-      85: 'Slight snow showers',
-      86: 'Heavy snow showers',
-      95: 'Thunderstorm',
-      96: 'Thunderstorm with slight hail',
-      99: 'Thunderstorm with heavy hail'
-    };
-    return codes[weatherCode] || 'Unknown';
-  }
-
-  private getWeatherIcon(weatherCode: number): string {
-    if (weatherCode === 0) return 'sunny';
-    if (weatherCode <= 3) return 'partly-sunny';
-    if (weatherCode <= 48) return 'cloudy';
-    if (weatherCode <= 67) return 'rainy';
-    if (weatherCode <= 77) return 'snowy';
-    if (weatherCode <= 82) return 'rainy';
-    return 'thunderstorm';
-  }
-
-  private formatTime(timeString: string): string {
-    return new Date(timeString).toLocaleTimeString('id-ID', {
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-  }
-
-  private formatDate(dateString: string): string {
-    return new Date(dateString).toLocaleDateString('id-ID', {
-      weekday: 'long',
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    });
-  }
-
-  private handleError(error: any): WeatherError {
-    if (error.response) {
-      // Server responded with error status
-      return {
-        code: error.response.status,
-        message: error.response.data?.message || 'Server error occurred',
-        details: error.response.data?.details
-      };
-    } else if (error.request) {
-      // Network error
-      return {
-        code: 0,
-        message: 'Network error. Please check your internet connection.',
-        details: 'No response received from server'
-      };
-    } else {
-      // Other error
-      return {
-        code: -1,
-        message: error.message || 'An unexpected error occurred',
-        details: error.toString()
-      };
-    }
-  }
-}
-
-// Export singleton instance
-export const weatherService = new WeatherService();
-```
-
----
-
-## 🛠️ Praktikum 2: Build Weather UI Components
-
-### 🎨 **Step 1: Weather Card Component**
-
-```vue
-<!-- src/components/WeatherCard.vue -->
 <template>
-  <ion-card class="weather-card" v-if="weatherData">
-    <ion-card-header>
-      <ion-card-title class="location-title">
-        <ion-icon :icon="locationOutline" />
-        {{ weatherData.location.name }}
-      </ion-card-title>
-      <ion-card-subtitle class="location-subtitle">
-        {{ weatherData.location.country }}
-      </ion-card-subtitle>
-    </ion-card-header>
+  <ion-accordion-group>
+    <ion-accordion v-for="(d, i) in data" :key="i">
+      <ion-item slot="header">
+        <ion-label>{{ d.date }} — rata-rata: {{ d.avg }}°C</ion-label>
+      </ion-item>
 
-    <ion-card-content>
-      <!-- Current Weather Display -->
-      <div class="current-weather">
-        <div class="weather-main">
-          <div class="temperature-display">
-            <ion-icon 
-              :icon="getWeatherIcon(weatherData.current.icon)"
-              class="weather-icon"
-            />
-            <div class="temperature-text">
-              <h1>{{ weatherData.current.temperature }}°C</h1>
-              <p>{{ weatherData.current.description }}</p>
-            </div>
-          </div>
-        </div>
-
-        <!-- Weather Details Grid -->
-        <ion-grid class="weather-details">
-          <ion-row>
-            <ion-col size="4">
-              <div class="detail-item">
-                <ion-icon :icon="waterOutline" />
-                <span>{{ weatherData.current.humidity }}%</span>
-                <small>Kelembaban</small>
-              </div>
-            </ion-col>
-            <ion-col size="4">
-              <div class="detail-item">
-                <ion-icon :icon="windOutline" />
-                <span>{{ weatherData.current.windSpeed }} km/j</span>
-                <small>Angin</small>
-              </div>
-            </ion-col>
-            <ion-col size="4">
-              <div class="detail-item">
-                <ion-icon :icon="thermometerOutline" />
-                <span>{{ weatherData.current.pressure }} hPa</span>
-                <small>Tekanan</small>
-              </div>
-            </ion-col>
-          </ion-row>
-        </ion-grid>
+      <div class="ion-padding" slot="content">
+        Cuaca rata-rata hari ini adalah {{ d.avg }}°C
       </div>
+    </ion-accordion>
+  </ion-accordion-group>
+</template>
 
-      <!-- Last Updated -->
-      <div class="last-updated">
-        <small>
-          <ion-icon :icon="timeOutline" />
-          Update: {{ formatLastUpdated(weatherData.lastUpdated) }}
-        </small>
-      </div>
-    </ion-card-content>
+<script setup>
+import { IonAccordion, IonAccordionGroup, IonItem, IonLabel } from "@ionic/vue";
+defineProps({ data: Array });
+</script>
+
+```
+
+### 🔧 **Step 4: Create HourlyForecast.vue**
+
+```typescript
+// src/components/HourlyForecast.vue
+
+<template>
+  <ion-list>
+    <ion-item v-for="(h, i) in data" :key="i">
+      <ion-label>
+        <h2>{{ h.time }}</h2>
+        <p>{{ h.temp }} °C</p>
+      </ion-label>
+    </ion-item>
+  </ion-list>
+</template>
+
+<script setup>
+import { IonList, IonItem, IonLabel } from "@ionic/vue";
+defineProps({ data: Array });
+</script>
+
+```
+
+### 🔧 **Step 5: Create ErrorMessage.vue**
+
+```typescript
+// src/components/ErrorMessage.vue
+
+<template>
+  <ion-card color="danger">
+    <ion-card-content>{{ message }}</ion-card-content>
   </ion-card>
 </template>
 
-<script setup lang="ts">
-import {
-  IonCard,
-  IonCardHeader,
-  IonCardTitle,
-  IonCardSubtitle,
-  IonCardContent,
-  IonGrid,
-  IonRow,
-  IonCol,
-  IonIcon
-} from '@ionic/vue';
-import {
-  locationOutline,
-  waterOutline,
-  windOutline,
-  thermometerOutline,
-  timeOutline,
-  sunny,
-  partlySunny,
-  cloudy,
-  rainy,
-  snowy,
-  thunderstorm
-} from 'ionicons/icons';
-import { WeatherData } from '@/types/weather';
-
-defineProps<{
-  weatherData?: WeatherData | null;
-}>();
-
-const getWeatherIcon = (iconName: string) => {
-  const iconMap: { [key: string]: any } = {
-    'sunny': sunny,
-    'partly-sunny': partlySunny,
-    'cloudy': cloudy,
-    'rainy': rainy,
-    'snowy': snowy,
-    'thunderstorm': thunderstorm
-  };
-  return iconMap[iconName] || sunny;
-};
-
-const formatLastUpdated = (timestamp: string): string => {
-  const date = new Date(timestamp);
-  return date.toLocaleString('id-ID', {
-    hour: '2-digit',
-    minute: '2-digit',
-    day: 'numeric',
-    month: 'short'
-  });
-};
+<script setup>
+import { IonCard, IonCardContent } from "@ionic/vue";
+defineProps({ message: String });
 </script>
 
-<style scoped>
-.weather-card {
-  margin: 16px;
-  border-radius: 16px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
 
-.location-title {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 1.2rem;
-  color: #2c3e50;
-}
-
-.location-subtitle {
-  color: #7f8c8d;
-  margin-top: 4px;
-}
-
-.current-weather {
-  text-align: center;
-}
-
-.weather-main {
-  margin-bottom: 24px;
-}
-
-.temperature-display {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 20px;
-  margin-bottom: 16px;
-}
-
-.weather-icon {
-  font-size: 64px;
-  color: #f39c12;
-}
-
-.temperature-text h1 {
-  font-size: 3rem;
-  font-weight: bold;
-  margin: 0;
-  color: #2c3e50;
-}
-
-.temperature-text p {
-  font-size: 1.1rem;
-  color: #7f8c8d;
-  margin: 4px 0 0 0;
-  text-transform: capitalize;
-}
-
-.weather-details {
-  margin-top: 20px;
-}
-
-.detail-item {
-  text-align: center;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
-  padding: 12px;
-  background: #f8f9fa;
-  border-radius: 12px;
-  transition: transform 0.2s;
-}
-
-.detail-item:hover {
-  transform: translateY(-2px);
-}
-
-.detail-item ion-icon {
-  font-size: 24px;
-  color: #3498db;
-  margin-bottom: 4px;
-}
-
-.detail-item span {
-  font-weight: bold;
-  font-size: 1rem;
-  color: #2c3e50;
-}
-
-.detail-item small {
-  color: #7f8c8d;
-  font-size: 0.75rem;
-  margin-top: 2px;
-}
-
-.last-updated {
-  text-align: center;
-  margin-top: 16px;
-  padding-top: 16px;
-  border-top: 1px solid #ecf0f1;
-  color: #95a5a6;
-}
-
-.last-updated small {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-}
-
-/* Responsive Design */
-@media (max-width: 768px) {
-  .temperature-display {
-    flex-direction: column;
-    gap: 12px;
-  }
-  
-  .weather-icon {
-    font-size: 48px;
-  }
-  
-  .temperature-text h1 {
-    font-size: 2.5rem;
-  }
-  
-  .detail-item {
-    padding: 8px;
-  }
-}
-</style>
 ```
 
-### 🎨 **Step 2: Hourly Forecast Component**
+### 🔧 **Step 6: Create LoadingSpinner.vue**
 
-```vue
-<!-- src/components/HourlyForecast.vue -->
+```typescript
+// src/components/LoadingSpinner.vue
+
 <template>
-  <ion-card v-if="hourlyData.length > 0" class="hourly-forecast">
-    <ion-card-header>
-      <ion-card-title>
-        <ion-icon :icon="timeOutline" />
-        Prakiraan Per Jam
-      </ion-card-title>
-    </ion-card-header>
-    
-    <ion-card-content>
-      <div class="hourly-scroll">
-        <div 
-          v-for="(hour, index) in hourlyData" 
-          :key="index"
-          class="hour-item"
-          :class="{ 'current-hour': isCurrentHour(hour.time) }"
-        >
-          <div class="hour-time">{{ hour.time }}</div>
-          <div class="hour-icon">
-            <ion-icon :icon="getWeatherIcon(hour.condition)" />
-          </div>
-          <div class="hour-temp">{{ hour.temperature }}°</div>
-          <div class="hour-details">
-            <div class="hour-humidity">
-              <ion-icon :icon="waterOutline" />
-              {{ hour.humidity }}%
-            </div>
-            <div class="hour-precipitation" v-if="hour.precipitation > 0">
-              <ion-icon :icon="rainyOutline" />
-              {{ hour.precipitation }}%
-            </div>
-          </div>
-        </div>
-      </div>
-    </ion-card-content>
-  </ion-card>
-</template>
-
-<script setup lang="ts">
-import {
-  IonCard,
-  IonCardHeader,
-  IonCardTitle,
-  IonCardContent,
-  IonIcon
-} from '@ionic/vue';
-import {
-  timeOutline,
-  waterOutline,
-  rainyOutline,
-  sunny,
-  partlySunny,
-  cloudy,
-  rainy,
-  snowy,
-  thunderstorm
-} from 'ionicons/icons';
-import { HourlyForecast } from '@/types/weather';
-
-defineProps<{
-  hourlyData: HourlyForecast[];
-}>();
-
-const isCurrentHour = (timeString: string): boolean => {
-  const hour = parseInt(timeString.split(':')[0]);
-  const currentHour = new Date().getHours();
-  return hour === currentHour;
-};
-
-const getWeatherIcon = (condition: string) => {
-  const iconMap: { [key: string]: any } = {
-    'clear sky': sunny,
-    'mainly clear': sunny,
-    'partly cloudy': partlySunny,
-    'overcast': cloudy,
-    'fog': cloudy,
-    'light drizzle': rainy,
-    'moderate drizzle': rainy,
-    'dense drizzle': rainy,
-    'slight rain': rainy,
-    'moderate rain': rainy,
-    'heavy rain': rainy,
-    'slight snow fall': snowy,
-    'moderate snow fall': snowy,
-    'heavy snow fall': snowy,
-    'thunderstorm': thunderstorm
-  };
-  return iconMap[condition.toLowerCase()] || partlySunny;
-};
-</script>
-
-<style scoped>
-.hourly-forecast {
-  margin: 16px;
-}
-
-.hourly-scroll {
-  display: flex;
-  gap: 12px;
-  overflow-x: auto;
-  padding: 8px 0;
-  scroll-behavior: smooth;
-}
-
-.hour-item {
-  min-width: 100px;
-  text-align: center;
-  padding: 16px 12px;
-  background: #f8f9fa;
-  border-radius: 16px;
-  border: 2px solid transparent;
-  transition: all 0.3s ease;
-  cursor: pointer;
-}
-
-.hour-item:hover {
-  background: #e9ecef;
-  transform: translateY(-2px);
-}
-
-.hour-item.current-hour {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  border-color: #667eea;
-}
-
-.hour-item.current-hour .hour-time,
-.hour-item.current-hour .hour-temp {
-  color: white;
-}
-
-.hour-time {
-  font-size: 0.875rem;
-  color: #6c757d;
-  margin-bottom: 8px;
-  font-weight: 600;
-}
-
-.hour-icon {
-  margin-bottom: 8px;
-}
-
-.hour-icon ion-icon {
-  font-size: 24px;
-  color: #f39c12;
-}
-
-.hour-item.current-hour .hour-icon ion-icon {
-  color: white;
-}
-
-.hour-temp {
-  font-size: 1.25rem;
-  font-weight: bold;
-  color: #2c3e50;
-  margin-bottom: 8px;
-}
-
-.hour-details {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.hour-humidity,
-.hour-precipitation {
-  font-size: 0.75rem;
-  color: #6c757d;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 2px;
-}
-
-.hour-item.current-hour .hour-humidity,
-.hour-item.current-hour .hour-precipitation {
-  color: rgba(255, 255, 255, 0.9);
-}
-
-.hour-humidity ion-icon,
-.hour-precipitation ion-icon {
-  font-size: 12px;
-}
-
-/* Custom scrollbar */
-.hourly-scroll::-webkit-scrollbar {
-  height: 6px;
-}
-
-.hourly-scroll::-webkit-scrollbar-track {
-  background: #f1f1f1;
-  border-radius: 3px;
-}
-
-.hourly-scroll::-webkit-scrollbar-thumb {
-  background: #c1c1c1;
-  border-radius: 3px;
-}
-
-.hourly-scroll::-webkit-scrollbar-thumb:hover {
-  background: #a8a8a8;
-}
-
-/* Responsive Design */
-@media (max-width: 480px) {
-  .hour-item {
-    min-width: 80px;
-    padding: 12px 8px;
-  }
-  
-  .hour-temp {
-    font-size: 1.1rem;
-  }
-  
-  .hour-icon ion-icon {
-    font-size: 20px;
-  }
-}
-</style>
-```
-
-### 🎨 **Step 3: Loading and Error Components**
-
-```vue
-<!-- src/components/LoadingSpinner.vue -->
-<template>
-  <div class="loading-container" v-if="loading">
-    <div class="loading-content">
-      <ion-spinner name="dots" />
-      <p>{{ message }}</p>
-    </div>
+  <div class="center">
+    <ion-spinner name="crescent"></ion-spinner>
+    <p>Loading data...</p>
   </div>
 </template>
 
-<script setup lang="ts">
-import { IonSpinner } from '@ionic/vue';
-
-defineProps<{
-  loading: boolean;
-  message?: string;
-}>();
+<script setup>
+import { IonSpinner } from "@ionic/vue";
 </script>
 
 <style scoped>
-.loading-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 200px;
-  padding: 20px;
-}
-
-.loading-content {
+.center {
   text-align: center;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 16px;
-}
-
-.loading-content p {
-  color: #6c757d;
-  font-size: 1rem;
-  margin: 0;
-}
-
-ion-spinner {
-  --color: #3498db;
-  width: 48px;
-  height: 48px;
+  margin-top: 30px;
 }
 </style>
+
 ```
 
-```vue
-<!-- src/components/ErrorMessage.vue -->
+### 🔧 **Step 7: Create WeatherCard.vue**
+
+```typescript
+// src/components/WeatherCard.vue
+
 <template>
-  <ion-card class="error-card" v-if="error">
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>{{ icon }} {{ temperature }}°C</ion-card-title>
+      <ion-card-subtitle>Jakarta Hari Ini</ion-card-subtitle>
+    </ion-card-header>
+  </ion-card>
+</template>
+
+<script setup>
+import { IonCard, IonCardHeader, IonCardTitle, IonCardSubtitle } from "@ionic/vue";
+defineProps({
+  temperature: Number,
+  icon: String
+});
+</script>
+
+```
+
+### 🔧 **Step 8: Create WeatherChart.vue (Optional)**
+
+```typescript
+// src/components/WeatherChart.vue
+
+<template>
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>Grafik Suhu (24 Jam)</ion-card-title>
+    </ion-card-header>
+
     <ion-card-content>
-      <div class="error-content">
-        <ion-icon :icon="alertCircleOutline" color="danger" />
-        <h3>{{ errorTitle }}</h3>
-        <p>{{ errorMessage }}</p>
-        <ion-button fill="clear" @click="$emit('retry')" v-if="showRetry">
-          <ion-icon :icon="refreshOutline" slot="start" />
-          Coba Lagi
-        </ion-button>
-      </div>
+      <Line :data="chartData" :options="chartOptions" />
     </ion-card-content>
   </ion-card>
 </template>
 
-<script setup lang="ts">
+<script setup>
+import { Line } from 'vue-chartjs'
 import {
-  IonCard,
-  IonCardContent,
-  IonIcon,
-  IonButton
-} from '@ionic/vue';
-import {
-  alertCircleOutline,
-  refreshOutline
-} from 'ionicons/icons';
+  Chart,
+  LineElement,
+  PointElement,
+  LinearScale,
+  CategoryScale,
+  Filler,
+  Tooltip,
+  Legend
+} from 'chart.js'
 
-defineProps<{
-  error: string;
-  showRetry?: boolean;
-}>();
+Chart.register(LineElement, PointElement, LinearScale, CategoryScale, Filler, Tooltip, Legend)
 
-defineEmits<{
-  retry: [];
-}>();
+const props = defineProps({
+  labels: Array,
+  temps: Array
+})
 
-const errorTitle = 'Terjadi Kesalahan';
-const errorMessage = 'Gagal mengambil data cuaca. Periksa koneksi internet Anda dan coba lagi.';
+const chartData = {
+  labels: props.labels,
+  datasets: [
+    {
+      label: "Suhu",
+      data: props.temps,
+      fill: true,
+      borderColor: "#3880ff",
+      backgroundColor: "rgba(56,128,255,0.2)",
+      tension: 0.3
+    }
+  ]
+}
+
+const chartOptions = {
+  responsive: true,
+  maintainAspectRatio: false
+}
 </script>
 
 <style scoped>
-.error-card {
-  margin: 16px;
-  border-left: 4px solid #dc3545;
-}
+ion-card { height: 1000px; }
 
-.error-content {
-  text-align: center;
-  padding: 20px;
-}
-
-.error-content ion-icon {
-  font-size: 48px;
-  margin-bottom: 16px;
-}
-
-.error-content h3 {
-  color: #dc3545;
-  margin-bottom: 8px;
-}
-
-.error-content p {
-  color: #6c757d;
-  margin-bottom: 16px;
-  line-height: 1.5;
-}
+.chart-container { height: 220px; }
 </style>
+
+
 ```
 
----
-
-## 🛠️ Praktikum 3: Main Weather Page Integration
-
-### 🏗️ **Step 1: Create Weather Composable**
+### 🔧 **Step 9: Create Tab1Page.vue**
 
 ```typescript
-// src/composables/useWeather.ts
+// src/views/Tab1Page.vue
 
-import { ref, computed, onMounted } from 'vue';
-import { weatherService } from '@/services/weatherService';
-import { WeatherData, WeatherError } from '@/types/weather';
-
-export function useWeather() {
-  // State
-  const weatherData = ref<WeatherData | null>(null);
-  const loading = ref(false);
-  const error = ref<string | null>(null);
-
-  // Computed properties
-  const hasWeatherData = computed(() => weatherData.value !== null);
-  const currentTemperature = computed(() => weatherData.value?.current.temperature || 0);
-  const locationName = computed(() => weatherData.value?.location.name || '');
-  const lastUpdated = computed(() => weatherData.value?.lastUpdated || '');
-
-  // Methods
-  const fetchWeather = async (latitude?: number, longitude?: number) => {
-    loading.value = true;
-    error.value = null;
-
-    try {
-      const data = await weatherService.getWeatherByCoordinates(
-        latitude || -6.2088, // Default: Jakarta
-        longitude || 106.8456
-      );
-      weatherData.value = data;
-      
-      // Save to localStorage for offline access
-      localStorage.setItem('weatherData', JSON.stringify(data));
-      localStorage.setItem('lastWeatherUpdate', new Date().toISOString());
-    } catch (err) {
-      const weatherError = err as WeatherError;
-      error.value = weatherError.message;
-      console.error('Weather fetch error:', weatherError);
-    } finally {
-      loading.value = false;
-    }
-  };
-
-  const fetchWeatherByCity = async (cityName: string) => {
-    loading.value = true;
-    error.value = null;
-
-    try {
-      const data = await weatherService.getWeatherByCity(cityName);
-      weatherData.value = data;
-      
-      // Save to localStorage
-      localStorage.setItem('weatherData', JSON.stringify(data));
-      localStorage.setItem('lastWeatherUpdate', new Date().toISOString());
-    } catch (err) {
-      const weatherError = err as WeatherError;
-      error.value = weatherError.message;
-      console.error('Weather fetch error:', weatherError);
-    } finally {
-      loading.value = false;
-    }
-  };
-
-  const refreshWeather = async () => {
-    if (weatherData.value) {
-      await fetchWeather(
-        weatherData.value.location.latitude,
-        weatherData.value.location.longitude
-      );
-    } else {
-      await fetchWeather();
-    }
-  };
-
-  const loadCachedWeather = () => {
-    try {
-      const cachedData = localStorage.getItem('weatherData');
-      const lastUpdate = localStorage.getItem('lastWeatherUpdate');
-      
-      if (cachedData && lastUpdate) {
-        const updateDate = new Date(lastUpdate);
-        const now = new Date();
-        const hoursDiff = (now.getTime() - updateDate.getTime()) / (1000 * 60 * 60);
-        
-        // Use cached data if less than 1 hour old
-        if (hoursDiff < 1) {
-          weatherData.value = JSON.parse(cachedData);
-          return true;
-        }
-      }
-    } catch (error) {
-      console.error('Error loading cached weather:', error);
-    }
-    return false;
-  };
-
-  const clearCache = () => {
-    localStorage.removeItem('weatherData');
-    localStorage.removeItem('lastWeatherUpdate');
-    weatherData.value = null;
-  };
-
-  // Initialize on mount
-  onMounted(async () => {
-    // Try to load cached data first
-    const hasCachedData = loadCachedWeather();
-    
-    // If no cached data or data is old, fetch fresh data
-    if (!hasCachedData) {
-      await fetchWeather();
-    }
-  });
-
-  return {
-    // State
-    weatherData,
-    loading,
-    error,
-    
-    // Computed
-    hasWeatherData,
-    currentTemperature,
-    locationName,
-    lastUpdated,
-    
-    // Methods
-    fetchWeather,
-    fetchWeatherByCity,
-    refreshWeather,
-    loadCachedWeather,
-    clearCache
-  };
-}
-```
-
-### 🏗️ **Step 2: Update Main Weather Page**
-
-```vue
-<!-- src/views/Tab1Page.vue → WeatherPage.vue -->
 <template>
   <ion-page>
     <ion-header>
       <ion-toolbar>
-        <ion-title>Aplikasi Cuaca</ion-title>
+        <ion-title>Cuaca Jakarta</ion-title>
         <ion-buttons slot="end">
-          <ion-button @click="refreshWeather" :disabled="loading">
+          <ion-button @click="fetchWeather" :disabled="loading">
             <ion-icon :icon="refreshOutline" />
           </ion-button>
         </ion-buttons>
       </ion-toolbar>
     </ion-header>
 
-    <ion-content :fullscreen="true">
-      <ion-header collapse="condense">
-        <ion-toolbar>
-          <ion-title size="large">Cuaca</ion-title>
-        </ion-toolbar>
-      </ion-header>
+    <ion-content>
 
-      <!-- Search Section -->
-      <div class="search-section">
-        <ion-searchbar
-          v-model="searchQuery"
-          placeholder="Cari kota..."
-          @ionInput="onSearchInput"
-          @ionClear="onSearchClear"
-          :animated="true"
-        />
-      </div>
+      <!-- Loading -->
+      <LoadingSpinner v-if="loading" />
 
-      <!-- Loading State -->
-      <LoadingSpinner :loading="loading" message="Mengambil data cuaca..." />
+      <!-- Error -->
+      <ErrorMessage v-if="error" :message="error" />
 
-      <!-- Error State -->
-      <ErrorMessage 
-        :error="error || ''" 
-        :show-retry="true"
-        @retry="refreshWeather"
+      <!-- Weather Summary -->
+      <WeatherCard
+        v-if="todayTemp"
+        :temperature="todayTemp"
+        :icon="weatherIcon"
       />
 
-      <!-- Weather Content -->
-      <template v-if="hasWeatherData && !loading && !error">
-        <!-- Current Weather Card -->
-        <WeatherCard :weather-data="weatherData" />
+      <!-- Chart Suhu -->
+      <WeatherChart
+        v-if="hourly.length"
+        :labels="hourly.map(h => h.time.split('T')[1])"
+        :temps="hourly.map(h => h.temp)"
+      />
 
-        <!-- Hourly Forecast -->
-        <HourlyForecast :hourly-data="weatherData?.hourly || []" />
+      <!-- Segment -->
+      <ion-segment v-model="segment">
+        <ion-segment-button value="hourly">
+          <ion-label>Hourly</ion-label>
+        </ion-segment-button>
 
-        <!-- Daily Forecast -->
-        <DailyForecast :daily-data="weatherData?.daily || []" />
+        <ion-segment-button value="daily">
+          <ion-label>Daily</ion-label>
+        </ion-segment-button>
+      </ion-segment>
 
-        <!-- Additional Info -->
-        <ion-card>
-          <ion-card-header>
-            <ion-card-title>
-              <ion-icon :icon="informationCircleOutline" />
-              Informasi Tambahan
-            </ion-card-title>
-          </ion-card-header>
-          <ion-card-content>
-            <ion-item>
-              <ion-label>UV Index</ion-label>
-              <ion-note slot="end">{{ weatherData?.current.uvIndex }}</ion-note>
-            </ion-item>
-            <ion-item>
-              <ion-label>Visibility</ion-label>
-              <ion-note slot="end">{{ weatherData?.current.visibility }} km</ion-note>
-            </ion-item>
-            <ion-item>
-              <ion-label>Sunrise</ion-label>
-              <ion-note slot="end">{{ weatherData?.daily[0]?.sunrise }}</ion-note>
-            </ion-item>
-            <ion-item>
-              <ion-label>Sunset</ion-label>
-              <ion-note slot="end">{{ weatherData?.daily[0]?.sunset }}</ion-note>
-            </ion-item>
-          </ion-card-content>
-        </ion-card>
-      </template>
+      <!-- Hourly Forecast -->
+      <HourlyForecast
+        v-if="segment === 'hourly'"
+        :data="hourly"
+      />
 
-      <!-- Location Settings -->
-      <ion-card>
-        <ion-card-header>
-          <ion-card-title>
-            <ion-icon :icon="locationOutline" />
-            Pengaturan Lokasi
-          </ion-card-title>
-        </ion-card-header>
-        <ion-card-content>
-          <ion-item>
-            <ion-label position="stacked">Latitude</ion-label>
-            <ion-input
-              v-model="latitude"
-              type="number"
-              placeholder="-6.2088"
-              :step="0.0001"
-            />
-          </ion-item>
-          <ion-item>
-            <ion-label position="stacked">Longitude</ion-label>
-            <ion-input
-              v-model="longitude"
-              type="number"
-              placeholder="106.8456"
-              :step="0.0001"
-            />
-          </ion-item>
-          <ion-button 
-            expand="block" 
-            @click="updateLocation"
-            :disabled="!latitude || !longitude"
-            fill="outline"
-          >
-            <ion-icon :icon="locationOutline" slot="start" />
-            Update Lokasi
-          </ion-button>
-        </ion-card-content>
-      </ion-card>
+      <!-- Daily Forecast -->
+      <DailyForecast
+        v-if="segment === 'daily'"
+        :data="daily"
+      />
+
     </ion-content>
   </ion-page>
 </template>
 
-<script setup lang="ts">
+<script setup>
+import { ref, onMounted } from "vue";
+import axios from "axios";
 import {
-  IonPage,
-  IonHeader,
-  IonToolbar,
-  IonTitle,
-  IonContent,
-  IonButtons,
-  IonButton,
-  IonIcon,
-  IonSearchbar,
-  IonCard,
-  IonCardHeader,
-  IonCardTitle,
-  IonCardContent,
-  IonItem,
-  IonLabel,
-  IonInput,
-  IonNote
-} from '@ionic/vue';
-import {
-  refreshOutline,
-  informationCircleOutline,
-  locationOutline
-} from 'ionicons/icons';
-import { ref, watch } from 'vue';
-import { useWeather } from '@/composables/useWeather';
-import WeatherCard from '@/components/WeatherCard.vue';
-import HourlyForecast from '@/components/HourlyForecast.vue';
-import DailyForecast from '@/components/DailyForecast.vue';
-import LoadingSpinner from '@/components/LoadingSpinner.vue';
-import ErrorMessage from '@/components/ErrorMessage.vue';
+  IonPage, IonHeader, IonToolbar, IonTitle,
+  IonContent, IonSegment, IonSegmentButton, IonLabel,
+  IonButtons, IonButton, IonIcon
+} from "@ionic/vue";
+import { refreshOutline } from "ionicons/icons";
 
-// Use weather composable
-const {
-  weatherData,
-  loading,
-  error,
-  hasWeatherData,
-  fetchWeather,
-  fetchWeatherByCity,
-  refreshWeather
-} = useWeather();
+import LoadingSpinner from "@/components/LoadingSpinner.vue";
+import ErrorMessage from "@/components/ErrorMessage.vue";
+import WeatherCard from "@/components/WeatherCard.vue";
+import HourlyForecast from "@/components/HourlyForecast.vue";
+import DailyForecast from "@/components/DailyForecast.vue";
+import WeatherChart from "@/components/WeatherChart.vue";
 
-// Local state
-const searchQuery = ref('');
-const latitude = ref('-6.2088');
-const longitude = ref('106.8456');
 
-// Debounced search
-let searchTimeout: NodeJS.Timeout;
-const onSearchInput = (event: CustomEvent) => {
-  const query = event.detail.value;
-  
-  // Clear previous timeout
-  if (searchTimeout) {
-    clearTimeout(searchTimeout);
+// state
+const loading = ref(false);
+const error = ref("");
+const segment = ref("hourly");
+const hourly = ref([]);
+const daily = ref([]);
+const todayTemp = ref(null);
+const weatherIcon = ref("🌤️"); // default
+
+// ambil data cuaca
+async function fetchWeather() {
+  loading.value = true;
+  error.value = "";
+
+  try {
+    const url =
+      "https://api.open-meteo.com/v1/forecast?latitude=-6.2&longitude=106.8&hourly=temperature_2m";
+
+    const res = await axios.get(url);
+    const t = res.data.hourly.temperature_2m;
+    const times = res.data.hourly.time;
+
+    // bentuk hourly list
+    hourly.value = times.map((time, i) => ({
+      time,
+      temp: t[i]
+    }));
+
+    // ringkasan hari ini
+    todayTemp.value = t[0];
+
+    // icon simple
+    if (todayTemp.value < 23) weatherIcon.value = "🌧️";
+    else if (todayTemp.value < 28) weatherIcon.value = "⛅";
+    else weatherIcon.value = "☀️";
+
+    // bentuk daily data (group by date)
+    const group = {};
+    hourly.value.forEach((h) => {
+      const date = h.time.split("T")[0];
+      if (!group[date]) group[date] = [];
+      group[date].push(h.temp);
+    });
+
+    daily.value = Object.keys(group).map((d) => ({
+      date: d,
+      avg: (group[d].reduce((a, b) => a + b, 0) / group[d].length).toFixed(1)
+    }));
+
+  } catch (err) {
+    error.value = "Gagal memuat data cuaca!";
+  } finally {
+    loading.value = false;
   }
-  
-  // Set new timeout for debounced search
-  searchTimeout = setTimeout(async () => {
-    if (query && query.length > 2) {
-      await fetchWeatherByCity(query);
-    }
-  }, 500);
-};
+}
 
-const onSearchClear = () => {
-  searchQuery.value = '';
-  refreshWeather();
-};
-
-const updateLocation = async () => {
-  const lat = parseFloat(latitude.value);
-  const lon = parseFloat(longitude.value);
-  
-  if (!isNaN(lat) && !isNaN(lon)) {
-    await fetchWeather(lat, lon);
-  }
-};
-
-// Watch for weather data changes to update location inputs
-watch(weatherData, (newData) => {
-  if (newData) {
-    latitude.value = newData.location.latitude.toString();
-    longitude.value = newData.location.longitude.toString();
-  }
-});
+onMounted(fetchWeather);
 </script>
 
 <style scoped>
-.search-section {
-  padding: 16px;
-  padding-bottom: 8px;
-}
-
-ion-card {
-  margin: 16px;
-}
-
-ion-card-title {
-  display: flex;
-  align-items: center;
-  gap: 8px;
+ion-segment {
+  margin: 20px;
 }
 </style>
-```
 
+```
 ---
 
 ## 🎯 Latihan Mandiri (Progressive Difficulty)
